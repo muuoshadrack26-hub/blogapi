@@ -33,9 +33,9 @@ def create_user(session:db_dep,user_info:UserCreate):
     session.refresh(user)
 
     return {"user_info":user}
-@app.put("/user/{user_id}")
-def update_user(user_id:int,user_info:UserUpdate,session:db_dep):
-    query=select(User).where(User.id==user_id)
+@app.put("/user")
+def update_user(user_info:UserUpdate,session:db_dep,current_user:User=Depends(get_current_user)):
+    query=select(User).where(User.id==current_user.id)
     user=session.execute(query).scalar()
 #the update process
     user.username=user_info.username
@@ -48,8 +48,8 @@ def update_user(user_id:int,user_info:UserUpdate,session:db_dep):
     return {"user_info":user}
 
 @app.delete("/user")
-def delete_user(user_id:int,session:db_dep):
-    query = select(User).where(User.id==user_id)
+def delete_user(session:db_dep,current_user:User=Depends(get_current_user)):
+    query = select(User).where(User.id==current_user.id)
     user=session.execute(query).scalar()
 
     if user is None:
